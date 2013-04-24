@@ -32,7 +32,9 @@ on adjacency lists."
 (defprotocol WeightedGraph
   (weight [g] [g n1 n2] "Return weight of edge [n1 n2] or (partial weight g)"))
 
-(defprotocol VertexLabelled)
+(defprotocol VertexLabeled)
+
+(defprotocol EdgeLabeled)
 
 ;; Variadic wrappers
 
@@ -296,66 +298,6 @@ on adjacency lists."
   WeightedGraph
   default-weighted-graph-impl)
 
-;;;
-;;; FlyGraph -- a read-only, ad-hoc graph which uses provided functions to
-;;; return values for nodes, edges, etc. Members which are not functions get
-;;; returned as-is. Edges can be inferred if nodes and neighbors are provided.
-;;; Nodes and edges can be inferred if neighbors and start are provided.
-;;;
-
-(defn- call-or-return [f & args]
-  (if (or (fn? f)
-          (and (instance? clojure.lang.IFn f) (seq args)))
-    (apply f args)
-    f))
-
-(def ^{:private true} default-flygraph-graph-impl
-  {:nodes (fn [g]
-            (if (or (:fnodes g) (not (:start g)))
-              (call-or-return (:fnodes g))
-              (bf-traverse (neighbors g) (:start g))))
-   :edges (fn [g]
-            (if (:fedges g)
-              (call-or-return (:fedges g))
-              (for [n (nodes g)
-                    nbr (neighbors g n)]
-                [n nbr])))
-   :neighbors (fn
-                ([g] (partial neighbors g))
-                ([g node] (call-or-return (:fneighbors g) node)))
-   :degree (fn [g node]
-             (count (neighbors g node)))})
-
-(def ^{:private true} default-flygraph-digraph-impl
-  {:incoming (fn [g node] (call-or-return (:fincoming g) node))
-   :in-degree (fn [g node] (count (incoming g node)))})
-
-(def ^{:private true} default-flygraph-weighted-impl
-  {:weight (fn [g n1 n2] (call-or-return (:fweight g) n1 n2))})
-
-(defrecord FlyGraph [fnodes fedges fneighbors start])
-(defrecord FlyDigraph [fnodes fedges fneighbors fincoming start])
-(defrecord WeightedFlyGraph [fnodes fedges fneighbors fweight start])
-(defrecord WeightedFlyDigraph [fnodes fedges fneighbors fincoming fweight start])
-
-;; Deprecate the flygraphs?  Instead provide interfaces on algorithms to 
-;; run the algorithm on 
-
-(extend FlyGraph
-  Graph default-flygraph-graph-impl)
-
-(extend FlyDigraph
-  Graph default-flygraph-graph-impl
-  Digraph default-flygraph-digraph-impl)
-
-(extend WeightedFlyGraph
-  Graph default-flygraph-graph-impl
-  WeightedGraph default-flygraph-weighted-impl)
-
-(extend WeightedFlyDigraph
-  Graph default-flygraph-graph-impl
-  Digraph default-flygraph-digraph-impl
-  WeightedGraph default-flygraph-weighted-impl)
 
 ;;;
 ;;; Utility functions and constructors
@@ -451,19 +393,4 @@ on adjacency lists."
   [& inits]
   (apply build-graph (SimpleWeightedDigraph. #{} {} {}) inits))
 
-(defn fly-graph
-  "Create a read-only, ad-hoc graph which uses the provided functions
-  to return values for nodes, edges, etc. If any members are not functions,
-  they will be returned as-is. Edges can be inferred if nodes and
-  neighbors are provided. Nodes and edges can be inferred if neighbors and
-  start are provided."
-  [& {:keys [nodes edges neighbors incoming weight start]}]
-  (cond
-   (and incoming weight)
-   (WeightedFlyDigraph. nodes edges neighbors incoming weight start)
-   incoming
-   (FlyDigraph. nodes edges neighbors incoming start)
-   weight
-   (WeightedFlyGraph. nodes edges neighbors weight start)
-   :else
-   (FlyGraph. nodes edges neighbors start)))
+

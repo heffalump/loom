@@ -4,8 +4,7 @@
   (:use [loom.attr :only [add-attr remove-attr attr]]
         [loom.graph :only [add-nodes add-edges]])
   (:import [loom.graph SimpleGraph SimpleDigraph
-            SimpleWeightedGraph SimpleWeightedDigraph
-            FlyGraph FlyDigraph WeightedFlyGraph WeightedFlyDigraph]))
+            SimpleWeightedGraph SimpleWeightedDigraph]))
 
 (defprotocol LabeledGraph
   (add-label [g node label] [g n1 n2 label] "Add a label to node or edge")
@@ -45,21 +44,6 @@
   LabeledGraph
   default-labeled-graph-impl)
 
-(extend FlyGraph
-  LabeledGraph
-  default-labeled-graph-impl)
-
-(extend FlyDigraph
-  LabeledGraph
-  default-labeled-graph-impl)
-
-(extend WeightedFlyGraph
-  LabeledGraph
-  default-labeled-graph-impl)
-
-(extend WeightedFlyDigraph
-  LabeledGraph
-  default-labeled-graph-impl)
 
 (defn labeled?
   "Return true if g satisfies LabeledGraph"

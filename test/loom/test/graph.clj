@@ -204,22 +204,22 @@
         77 (weight g6 2 1)
         88 (weight g4 6 5)
         1 (weight g4 7 8)))))
-
-(deftest fly-graph-test
-  (let [fg1 (fly-graph :nodes [1 2 3]
-                       :neighbors #(if (= 3 %) [1] [(inc %)])
-                       :weight (constantly 88))
-        fg2 (fly-graph :neighbors #(if (= 3 %) [1] [(inc %)])
-                       :start 1)]
-    (testing "Construction, nodes, edges"
-      (are [expected got] (= expected got)
-        #{1 2 3} (set (nodes fg1))
-        #{1 2 3} (set (nodes fg2))
-        #{[1 2] [2 3] [3 1]} (set (edges fg1))
-        #{[1 2] [2 3] [3 1]} (set (edges fg2))
-        88 (weight fg1 1 2)))
-    ;; TODO: finish
-    ))
+(comment 
+  (deftest fly-graph-test
+    (let [fg1 (fly-graph :nodes [1 2 3]
+                         :neighbors #(if (= 3 %) [1] [(inc %)])
+                         :weight (constantly 88))
+          fg2 (fly-graph :neighbors #(if (= 3 %) [1] [(inc %)])
+                         :start 1)]
+      (testing "Construction, nodes, edges"
+        (are [expected got] (= expected got)
+             #{1 2 3} (set (nodes fg1))
+             #{1 2 3} (set (nodes fg2))
+             #{[1 2] [2 3] [3 1]} (set (edges fg1))
+             #{[1 2] [2 3] [3 1]} (set (edges fg2))
+             88 (weight fg1 1 2)))
+      ;; TODO: finish
+      )))
 
 (deftest utilities-test
   (testing "Predicates"
@@ -228,15 +228,12 @@
                                       (digraph [1 2])
                                       (weighted-graph [1 2])
                                       (weighted-digraph [1 2])
-                                      (fly-graph :neighbors [1 2])
                                       (reify Graph)]))
       true (every? true? (map directed? [(digraph [1 2])
                                          (weighted-digraph [1 2])
-                                         (fly-graph :incoming [1 2])
                                          (reify Digraph)]))
       true (every? true? (map weighted? [(weighted-graph [1 2])
                                          (weighted-digraph [1 2])
-                                         (fly-graph :weight (constantly 1))
                                          (reify WeightedGraph)]))))
   (testing "Adders"
     (let [g (weighted-digraph [1 2] [2 3] [3 1])

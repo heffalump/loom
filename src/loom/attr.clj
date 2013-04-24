@@ -5,8 +5,7 @@ thickness, etc)."
   loom.attr
   (use [loom.graph :only [directed? nodes edges]])
   (:import [loom.graph SimpleGraph SimpleDigraph
-            SimpleWeightedGraph SimpleWeightedDigraph
-            FlyGraph FlyDigraph WeightedFlyGraph WeightedFlyDigraph]))
+            SimpleWeightedGraph SimpleWeightedDigraph]))
 
 (defprotocol AttrGraph
   (add-attr [g node k v] [g n1 n2 k v] "Add an attribute to node or edge")
@@ -55,21 +54,6 @@ thickness, etc)."
   AttrGraph
   default-attr-graph-impl)
 
-(extend FlyGraph
-  AttrGraph
-  default-attr-graph-impl)
-
-(extend FlyDigraph
-  AttrGraph
-  default-attr-graph-impl)
-
-(extend WeightedFlyGraph
-  AttrGraph
-  default-attr-graph-impl)
-
-(extend WeightedFlyDigraph
-  AttrGraph
-  default-attr-graph-impl)
 
 (defn attr?
   "Return true if g satisfies AttrGraph"
